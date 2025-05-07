@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mslih Style Project - Mini E-commerce</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: #f5f5f7;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  #app {
+    max-width: 350px;
+    margin: 0 auto;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  header {
+    padding: 12px 16px;
+    background: #ff5722;
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .search-bar {
+    margin: 10px 16px;
+    display: flex;
+  }
+
+  .search-bar input {
+    flex-grow: 1;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 20px 0 0 20px;
+    border: none;
+    outline: none;
+    background: #fff9f6;
+    color: #555;
+    border: 1px solid #ff5722;
+  }
+
+  .search-bar button {
+    background: #e64a19;
+    border: none;
+    color: white;
+    padding: 9px 14px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  .search-bar button:hover {
+    background: #bf360c;
+  }
+
+  main {
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 12px;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: box-shadow 0.25s ease;
+  }
+  .product-card:hover {
+    box-shadow: 0 5px 12px rgba(0,0,0,0.12);
+  }
+
+  .product-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+  }
+
+  .product-info {
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+  }
+
+  .product-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #222;
+    line-height: 1.2em;
+    height: 2.4em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-price {
+    color: #ff5722;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .product-rating {
+    font-size: 13px;
+    color: #fbc02d;
+  }
+
+  button.add-to-cart {
+    margin-top: auto;
+    background: #ff5722;
+    border: none;
+    color: white;
+    padding: 8px 0;
+    border-radius: 0 0 12px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button.add-to-cart:hover {
+    background: #bf360c;
+  }
+
+  /* Cart button */
+  #cart-button {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    background: #ff5722;
+    color: white;
+    border: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    font-size: 26px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.23);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+  }
+  #cart-button:hover {
+    background: #bf360c;
+  }
+
+  /* Cart modal */
+  #cart-modal {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 350px;
+    max-height: 400px;
+    background: white;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.3);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 16px 20px;
+    display: none;
+    flex-direction: column;
+    user-select: text;
+    z-index: 1200;
+  }
+  #cart-modal.active {
+    display: flex;
+  }
+  #cart-modal h2 {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    color: #ff5722;
+  }
+  #cart-items {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+  .cart-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    align-items: center;
+  }
+  .cart-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+  .cart-item-info {
+    flex-grow: 1;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+  }
+  .cart-item-price {
+    color: #ff5722;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .cart-item-remove {
+    color: #444;
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+    padding: 0 4px;
+  }
+  .cart-item-remove:hover {
+    color: #bf360c;
+  }
+  #cart-total {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-top: 8px;
+    color: #222;
+    text-align: right;
+  }
+  #close-cart {
+    position: absolute;
+    top: 8px; right: 12px;
+    font-size: 20px;
+    color: #ff5722;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  #close-cart:hover {
+    color: #bf360c;
+  }
+</style>
+</head>
+<body>
+
+<div id="app" role="main" aria-label="Mslih Style Mini E-commerce Project">
+  <header>mslih style project</header>
+  <div class="search-bar">
+    <input type="search" id="search-input" aria-label="Search products" placeholder="Search products..." />
+    <button id="search-btn" aria-label="Search">GO</button>
+  </div>
+  <main>
+    <div class="products-grid" id="products-grid" aria-live="polite" aria-relevant="additions removals"></div>
+  </main>
+</div>
+<button id="cart-button" aria-label="View cart" title="Cart 🛒">🛒</button>
+
+<!-- Cart Modal -->
+<div id="cart-modal" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+  <div id="close-cart" aria-label="Close cart" title="Close">&#10005;</div>
+  <h2 id="cart-title">Shopping Cart</h2>
+  <div id="cart-items"></div>
+  <div id="cart-total">Total: $0.00</div>
+</div>
+
+<script>
+  (() => {
+    const productsGrid = document.getElementById('products-grid');
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const cartButton = document.getElementById('cart-button');
+    const cartModal = document.getElementById('cart-modal');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotalEl = document.getElementById('cart-total');
+    const closeCartBtn = document.getElementById('close-cart');
+
+    // Sample product data (dummy)
+    const products = [
+      {
+        id: 1,
+        name: "Wireless Bluetooth Earbuds",
+        price: 299000,
+        rating: 4.5,
+        image: "https://image.ceneostatic.pl/data/products/52606106/i-jbl-tune-125tws.jpg"
+      },
+      {
+        id: 2,
+        name: "Samsung Galaxy S21 128GB",
+        price: 8999000,
+        rating: 4.7,
+        image: "https://images.samsung.com/is/image/samsung/p6pim/id/galaxy-s21/gallery/id-galaxy-s21-5g-g991-sm-g991bzvaxme-368566860?$720_576_PNG$"
+      },
+      {
+        id: 3,
+        name: "HP Pavilion 15 Notebook",
+        price: 5899000,
+        rating: 4.3,
+        image: "https://ssl-product-images.www8-hp.com/digmedialib/prodimg/lowres/c06665127.png"
+      },
+      {
+        id: 4,
+        name: "Nike Air Max 270",
+        price: 1599000,
+        rating: 4.2,
+        image: "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/b0e4b5af-09e8-4d79-9de4-447378879897/air-max-270-shoe-KkLcGR.png"
+      },
+      {
+        id: 5,
+        name: "Apple MacBook Air M2",
+        price: 17999000,
+        rating: 4.8,
+        image: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/macbook-air-m2-silver-select-202206_GEO_ID?wid=904&hei=840&fmt=png-alpha&.v=1653493200207"
+      },
+      {
+        id: 6,
+        name: "Sony PlayStation 5 Console",
+        price: 7999000,
+        rating: 4.9,
+        image: "https://compass-ssl.xbox.com/assets/a6/04/a604d0d5-211a-4f12-89ae-7211b55d10d3.png?n=PlayStation-5-Carousel-0_1055x594.jpg"
+      },
+      {
+        id: 7,
+        name: "Logitech MX Master 3 Mouse",
+        price: 1699000,
+        rating: 4.6,
+        image: "https://resource.logitech.com/w_692,c_limit,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-3/gallery/mx-master-3-top-view-graphite.png?v=1"
+      },
+      {
+        id: 8,
+        name: "Xiaomi Redmi Note 12 Pro",
+        price: 4499000,
+        rating: 4.4,
+        image: "https://i01.appmifile.com/webfile/globalimg/products/pc/redminote12pro/overview/black.png"
+      }
+    ];
+
+    let cart = [];
+
+    // Format currency as Indonesian Rupiah style
+    function formatRupiah(value) {
+      return "Rp " + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ",-";
+    }
+
+    // Render products
+    function renderProducts(filter = '') {
+      const searchTerm = filter.trim().toLowerCase();
+      productsGrid.innerHTML = '';
+
+      const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+      if (filtered.length === 0) {
+        productsGrid.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">No products found...</p>';
+        return;
+      }
+
+      filtered.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Add ${product.name} to cart for ${formatRupiah(product.price)}`);
+        card.innerHTML = `
+          <div class="product-image" style="background-image: url('${product.image}')"></div>
+          <div class="product-info">
+            <div class="product-name">${product.name}</div>
+            <div class="product-price">${formatRupiah(product.price)}</div>
+            <div class="product-rating" aria-label="Rating: ${product.rating} out of 5 stars">${'⭐'.repeat(Math.round(product.rating))}</div>
+            <button class="add-to-cart" aria-label="Add to cart">Add to Cart</button>
+          </div>
+        `;
+        const addBtn = card.querySelector('.add-to-cart');
+        addBtn.addEventListener('click', () => {
+          addToCart(product.id);
+        });
+        productsGrid.appendChild(card);
+      });
+    }
+
+    // Add to cart
+    function addToCart(productId) {
+      const existing = cart.find(item => item.product.id === productId);
+      if (existing) {
+        existing.qty++;
+      } else {
+        const product = products.find(p => p.id === productId);
+        if (product) cart.push({product, qty: 1});
+      }
+      alert('Added to cart!');
+      renderCart();
+    }
+
+    // Remove from cart
+    function removeFromCart(index) {
+      if (index >= 0 && index < cart.length) {
+        cart.splice(index, 1);
+        renderCart();
+      }
+    }
+
+    // Render cart modal
+    function renderCart() {
+      cartItemsContainer.innerHTML = '';
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p style="color:#666; font-style: italic;">Your cart is empty</p>';
+        cartTotalEl.textContent = 'Total: Rp 0,-';
+        return;
+      }
+      let total = 0;
+      cart.forEach((item, index) => {
+        total += item.product.price * item.qty;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <img src="${item.product.image}" alt="${item.product.name}" />
+          <div class="cart-item-info">${item.product.name} x${item.qty}</div>
+          <div class="cart-item-price">${formatRupiah(item.product.price * item.qty)}</div>
+          <div class="cart-item-remove" role="button" tabindex="0" aria-label="Remove ${item.product.name} from cart" title="Remove">&times;</div>
+        `;
+        div.querySelector('.cart-item-remove').addEventListener('click', () => {
+          removeFromCart(index);
+        });
+        cartItemsContainer.appendChild(div);
+      });
+      cartTotalEl.textContent = 'Total: ' + formatRupiah(total);
+    }
+
+    // Toggle cart modal
+    function toggleCart() {
+      if (cartModal.classList.contains('active')) {
+        cartModal.classList.remove('active');
+      } else {
+        renderCart();
+        cartModal.classList.add('active');
+      }
+    }
+
+    // Search products
+    searchBtn.addEventListener('click', () => {
+      renderProducts(searchInput.value);
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        renderProducts(searchInput.value);
+      }
+    });
+
+    cartButton.addEventListener('click', toggleCart);
+    closeCartBtn.addEventListener('click', () => {
+      cartModal.classList.remove('active');
+    });
+
+    // Accessibility: close cart modal with Escape
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && cartModal.classList.contains('active')) {
+        cartModal.classList.remove('active');
+        cartButton.focus();
+      }
+    });
+
+    renderProducts();
+
+  })();
+</script>
+
+</body>
+</html>
+</content>
+</create_file>
+
+<attempt_completion>
+Thanks banget udah nyempetin waktu buat mampir ke website pertama gue—MSLIH Project. Honestly, this project means a lot to me karena gue bener-bener mulai semuanya dari nol, sambil belajar dan ngulik hal-hal baru. Semoga konten yang gue share di sini bisa bermanfaat, ngasih lo insight, atau at least bikin lo senyum dikit lah. If you have any feedback, ideas, or just wanna say hi, feel free to reach out—gue selalu open buat connect dan berkembang bareng-bareng. Stay curious, stay inspired, and see you around!!
+</attempt_completion>
